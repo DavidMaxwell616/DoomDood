@@ -1,4 +1,4 @@
-const game = new Phaser.Game(750, 500, Phaser.CANVAS, 'game', {
+const game = new Phaser.Game(1000, 500, Phaser.CANVAS, 'game', {
   preload,
   create,
   update,
@@ -20,7 +20,7 @@ function updateStats() {
 
 function copyPixels2(a,b,c,d,e,f)
 {
-  "string"==typeof a&&(a=game.cache.getImage(a)),a&&
+  "string"==typeof a&&(a=cache.getImage(a)),a&&
   context.drawImage(a,b.x,b.y,b.width,b.height,c,d,e,f);
 }
 
@@ -39,35 +39,35 @@ function gameCreate() {
   // // bmd.smoothed = false;
   map.sky = game.add.image(0, 0, 'sky');
   map.sky.width = 4000;
-  map.sky.height = game.height;
+  map.sky.height = height;
   map.wallTexture = game.add.image(0, 0, 'wall');
   map.wallTexture.visible = false;
  //drawSky(player.direction, map.sky, map.light);
  //drawColumns(player, map, objects);
-//   var bobX = Math.cos(player.paces * 2) * this.scale * 6;
-//   var bobY = Math.sin(player.paces * 4) * this.scale * 6;
-//   var left = game.width * 0.55 + bobX;
-//   var top = game.height * 0.5 + bobY;
-//   knife = game.add.sprite(left, top, 'knife_hand');
+//   var bobX = Math.cos(player.paces * 2) * scale * 6;
+//   var bobY = Math.sin(player.paces * 4) * scale * 6;
+//   var left = width * 0.55 + bobX;
+//   var top = height * 0.5 + bobY;
+//   knife = add.sprite(left, top, 'knife_hand');
 //   knife.width=320;
 //   knife.height=320;
-//   goo = game.add.sprite(0, 0, 'goo_hand');
+//   goo = add.sprite(0, 0, 'goo_hand');
 //  // knife.visible = false;
 //   goo.visible = false;
   //drawWeapon(player.weapon, player.paces);
   // drawMiniMap(map, player);
-  game.cursors = game.input.keyboard.createCursorKeys();
-  game.spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+  cursors = game.input.keyboard.createCursorKeys();
+  spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
-  levelText = game.add.text(80, 5, 'Level: ' + level, {
+  levelText = game.add.text(game.width *.1, 5, 'Level: ' + level, {
     fill: '#ffffff',
     font: '14pt Arial',
   });
-  scoreText = game.add.text(350, 5, 'Score: ' + score, {
+  scoreText = game.add.text(game.width*.45, 5, 'Score: ' + score, {
     fill: '#ffffff',
     font: '14pt Arial',
   });
-  livesText = game.add.text(650, 5, 'Lives: ' + lives, {
+  livesText = game.add.text(game.width *.8, 5, 'Lives: ' + lives, {
     fill: '#ffffff',
     font: '14pt Arial',
   });
@@ -114,8 +114,9 @@ function getMapObject(x, y) {
   return map.objects[y * map.size + x];
 }
 
-function rotate(angle) {
-  player.direction = (player.direction + angle + CIRCLE) % CIRCLE;
+function rotatePlayer(angle) {
+  player.direction += (angle + CIRCLE) % CIRCLE;
+//console.log(player.direction,angle);
 }
 
 function drawColumns(player, map, objects) {
@@ -124,25 +125,24 @@ function drawColumns(player, map, objects) {
     var angle = fov * (column / resolution - 0.5);
     var ray = mapCast(player, player.direction + angle, range);
     var columnProps = drawColumn(column, ray, angle, map);
-    //  console.log(angle, ray, columnProps);
-
+ 
     allObjects.push(columnProps);
   }
   //  drawSprites(player, map, allObjects);
 };
 
-function updateSky(direction, sky, ambient) {
-  console.log(direction);
-  //var width = this.width * (CIRCLE / this.fov);
-  //var left = -width * direction / CIRCLE;
-
+function updateSky() {
+  var width = game.width * (CIRCLE / fov);
+  var left = -width * player.direction / CIRCLE;
   //sky.width=width;
-  //sky.height=this.height;
-  
-  //  if (left < width - this.width) 
-  //     sky.x= left + width, 0;
+  //sky.height=height;
+  map.sky.x = left;  
+  map.sky.width = width;
+  console.log(ambient);
+  if (left < game.width - width) 
+       map.sky.x= left + width, 0;
   if (ambient > 0) {
-    drawRectangle(0, this.height * 0.5, this.width, this.height * 0.5, '#ffffff', ambient * 0.1);
+    drawRectangle(0, game.height * 0.5, game.width, game.height * 0.5, '#ffffff', ambient * 0.1);
   }
 };
 
@@ -165,11 +165,11 @@ function drawColumn(column, ray, angle, map) {
 
     if (s === hit) {
       textureX = Math.floor(wallTexture.width * step.offset);
-      wall = this.project(step.height, angle, step.distance);
+      wall = project(step.height, angle, step.distance);
       var rect = new Phaser.Rectangle(textureX, 0, 1, wallTexture.height);
-      //   console.log(rect);
+ 
       copyPixels2(map.wallTexture.image, rect, left, wall.top, width, wall.height);
-      var alpha = Math.max((step.distance + step.shading) / this.lightRange - map.light, 0);
+      var alpha = Math.max((step.distance + step.shading) / lightRange - map.light, 0);
       drawRectangle(left, wall.top, width, wall.height, '#000000', alpha);
       hitDistance = step.distance;
     } else if (step.object) {
@@ -203,8 +203,8 @@ function drawRectangle(x, y, w, h, f, a) {
 
 function project(height, angle, distance) {
   var z = distance * Math.cos(angle);
-  var wallHeight = this.height * height / z;
-  var bottom = this.height / 2 * (1 + 1 / z);
+  var wallHeight = height * height / z;
+  var bottom = height / 2 * (1 + 1 / z);
   return {
     top: bottom - wallHeight,
     height: wallHeight
@@ -265,7 +265,7 @@ function mapCast(point, angle, range, objects) {
 function drawWeapon(weapon, paces) {
   var bobX = Math.cos(paces * 2) * scale * 6;
   var bobY = Math.sin(paces * 4) * scale * 6;
-  var left = game.width * 0.55 + bobX;
+  var left = width * 0.55 + bobX;
   var top = height * 0.6 + bobY;
   weapon.left = left;
   weapon.top = top;
@@ -273,28 +273,40 @@ function drawWeapon(weapon, paces) {
   weapon.height *= scale;;
 }
 
-function walk(distance, angle, map) {
-  var dx = Math.cos(this.direction + angle) * distance;
-  var dy = Math.sin(this.direction + angle) * distance;
-  if (map.get(this.x + dx, this.y) <= 0) this.x += dx;
-  if (map.get(this.x, this.y + dy) <= 0) this.y += dy;
-  this.paces += distance;
+function walk(distance, angle) {
+  var dx = Math.cos(player.direction + angle) * distance;
+  var dy = Math.sin(player.direction + angle) * distance;
+  if (getMapValue(player.x + dx, player.y) <= 0) player.x += dx;
+  if (getMapValue(player.x, player.y + dy) <= 0) player.y += dy;
+  player.paces += distance;
 };
 
 function movePlayer() {
-  //  var speed = running && player.stamina > 0 ? 3 : 1.5;
+  var speed = player.running && player.stamina > 0 ? 3 : 1.5;
   var seconds = 1;
-  if (states.forward) walk(speed * seconds, 0, map);
-  if (states.backward) walk(-speed * seconds, 0, map);
+  if (player.state==states.forward) walk(speed * seconds, 0);
+  if (player.state==states.backward) walk(-speed * seconds, 0);
+  
+  if (player.state==states.left) rotatePlayer(-Math.PI * seconds);;
+  if (player.state==states.right) rotatePlayer(Math.PI * seconds);;
 
-  if (states.left) this.walk((-speed / 2) * seconds, Math.PI * 0.5, map);
-  if (states.right) this.walk((speed / 2) * seconds, Math.PI * 0.5, map);
-
-  if (states.running && player.stamina > -1) {
+  if (player.state==states.running && player.stamina > -1) {
     player.stamina -= 0.1;
   } else if (player.stamina < 10) {
     player.stamina += 0.5;
   }
+  var maxSpeed = 1000, // fastest possible mouse speed
+  speed = Math.min(player.x, maxSpeed) / maxSpeed,
+  amount = Math.PI * speed;
+
+if (player.direction > CIRCLE) {
+  amount -= CIRCLE;
+} else if (player.direction < 0) {
+  amount += CIRCLE;
+}
+
+player.direction += amount;
+
 }
 
 function cycleWeapons() {
@@ -325,18 +337,20 @@ function update() {
   //   mainMenuUpdate();
   //   return;
   // }
-  if (game.cursors.left.isDown)
+  player.state = states.still;
+  if (cursors.left.isDown)
      player.state = states.left;
-   else if (game.cursors.right.isDown)
+   else if (cursors.right.isDown)
      player.state = states.right;
-  else if (game.cursors.up.isDown)
+  else if (cursors.up.isDown)
     player.state = states.forward;
-  else if (game.cursors.down.isDown)
+  else if (cursors.down.isDown)
     player.state = states.backward;
-  movePlayer();
+  if(player.state!=states.still)
+    movePlayer();
   updateStats();
 // context.clearRect(0, 0, context.canvas.width, context.canvas.height);;
-updateSky(player.direction, map.sky, map.light);
+updateSky();
  //  drawColumns(player, map, objects);
   // drawWeapon(player.weapon, player.paces);
   // drawMiniMap(map, player);
@@ -348,7 +362,7 @@ function render() {
   //   mainMenuUpdate();
   //   return;
   // }
-  // game.debug.box2dWorld();
+  // debug.box2dWorld();
 }
 
 function randomizeMap() {
@@ -359,10 +373,10 @@ function randomizeMap() {
 
 
 function drawSpriteColumn(column, columnProps, sprites) {
-  var left = Math.floor(column * this.spacing),
+  var left = Math.floor(column * spacing),
     width = Math.ceil(spacing),
-    angle = fov * (column / this.resolution - 0.5),
-    columnWidth = this.width / this.resolution;
+    angle = fov * (column / resolution - 0.5),
+    columnWidth = width / resolution;
 
   //todo: make rays check for objects, and return those that it actually hit
 
@@ -387,19 +401,18 @@ function drawSpriteColumn(column, columnProps, sprites) {
       left > sprite.cameraXOffset - sprite.width / 2 &&
       left < sprite.cameraXOffset + sprite.width / 2;
 
-    //console.log(spriteIsInColumn);
-
+ 
     if (spriteIsInColumn) {
       textureX = Math.floor(
         (sprite.width / sprite.numColumns) * (column - sprite.firstColumn),
       );
 
-      this.ctx.fillStyle = 'black';
-      this.ctx.globalAlpha = 1;
+      ctx.fillStyle = 'black';
+      ctx.globalAlpha = 1;
       //ctx.fillRect(left, top , 10, sprite.height);
 
       var brightness =
-        Math.max(sprite.distanceFromPlayer / this.lightRange - map.light, 0) *
+        Math.max(sprite.distanceFromPlayer / lightRange - map.light, 0) *
         100;
 
       sprite.style.webkitFilter = 'brightness(' + brightness + '%)';

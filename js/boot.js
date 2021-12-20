@@ -45,14 +45,15 @@ const mapBlockSize = 5, // Size of walls on the mini map
   const mapOffsetX = 670,
     mapOffsetY = 0;
 const states = {
-  'left': false,
-  'right': false,
-  'forward': false,
-  'backward': false,
-  'running': false
+  'still': 0,
+  'left': 1,
+  'right': 2,
+  'forward': 3,
+  'backward': 4,
+  'running': 5
 };
 var context;
-
+var ambient = 0;
 function Player(x, y, direction, inventory) {
   this.x = x;
   this.y = y;
@@ -62,7 +63,7 @@ function Player(x, y, direction, inventory) {
   this.inventory = inventory;
   this.weapon = this.inventory[0];
   this.paces = 0;
-  this.state;
+  this.state = states.still;
 }
 
 // function Bitmap(src, width, height) {

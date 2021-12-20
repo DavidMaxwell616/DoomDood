@@ -260,8 +260,7 @@ Camera.prototype.render = function (player, map, objects) {
 Camera.prototype.drawSky = function (direction, sky, ambient) {
   var width = this.width * (CIRCLE / this.fov);
   var left = -width * direction / CIRCLE;
-  console.log(this.width);
-
+  
   // console.log(width, left, this.width, this.height);
   this.ctx.save();
   this.ctx.drawImage(sky.image, left, 0, width, this.height);
